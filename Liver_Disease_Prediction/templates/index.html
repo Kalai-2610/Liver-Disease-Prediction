@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--link rel="stylesheet" href="index.css"-->
+    <title>Liver Disease Predictor</title>
+    <style>
+        *{
+            background-color: #0e1538;
+            color: whitesmoke;
+            font-variant: small-caps;
+            font-size: large;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            min-width: 200px;
+            min-height: 600px;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        h2{
+            display: block;
+            font-size: 1.5cm;
+            margin: 0.7em;
+            text-align: center;
+        }
+        table{
+            margin-left: auto;
+            margin-right: auto;
+            vertical-align: middle;
+        }
+        td{
+            margin: 1em;
+            padding: 0.5em;
+            text-align: justify;
+        }
+        input{
+            border-radius: 1em;
+            border: solid;
+            border-color: whitesmoke;
+            border-width: 2px;
+            color: #00ccff;
+            padding: 0.2em 0.7em;
+            -moz-appearance: textfield; /*For Firefox*/
+        }
+        /*For Chrome and safari*/
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+        }
+        input::placeholder{
+            color: #00ccff;
+        }
+        #btndiv{
+            padding: 2px;
+            width: max-content;
+            border-radius: 1em;
+            background: linear-gradient(45deg,#00ccff,#0e1538,#d400d4);
+            display: inline;
+        }
+        #submit,#reset{
+            /*border-radius: 1em;
+            border-style: solid;
+            border-color: whitesmoke;*/
+            border: none;
+            background: #0e1538;
+            color: whitesmoke;
+            padding: 0.2em 0.7em;
+            border-radius: 1em;
+        }
+        #btn{
+            display: flex;
+        }
+        #submit:hover{
+            cursor: pointer;
+        }
+        #btndiv:hover{
+            background: linear-gradient(45deg,#1aff22,#0e1538,#ff075b);
+        }
+        #positive{
+            background: linear-gradient(10deg,#1aff22,#0e1538,#0e1538,#0e1538,#1aff22);
+            padding: 5px;
+            margin: 1em;
+            border-radius: 3rem;
+        }
+        #negative{
+            background: linear-gradient(10deg,#ff075b,#0e1538,#0e1538,#0e1538,#ff075b);
+            padding: 5px;
+            margin: 1em;
+            border-radius: 3rem;
+        }
+        #positive:hover{
+            background: linear-gradient(170deg,#1aff22,#0e1538,#0e1538,#0e1538,#1aff22);
+        }
+        #negative:hover{
+            background: linear-gradient(170deg,#ff075b,#0e1538,#0e1538,#0e1538,#ff075b);
+        }
+        h4{
+            display: block;
+            font-size: 0.8cm;
+            margin: auto;
+            padding: 1em;
+            border-radius: 3rem;
+            text-align: center;
+            background: #0e1538;
+        }
+    </style>
+    <script>
+        function Predict()
+        {
+            document.getElementById('positive').hidden = true;
+            document.getElementById('negative').hidden = true;
+            var age = document.forms["ipdata"]["age"].value;
+            var gender = document.forms["ipdata"]["gender"].value;
+            var tb = document.forms["ipdata"]["tb"].value;
+            var db = document.forms["ipdata"]["db"].value;
+            var ap = document.forms["ipdata"]["ap"].value;
+            var aa = document.forms["ipdata"]["aa"].value;
+            var asa = document.forms["ipdata"]["asa"].value;
+            var a = document.forms["ipdata"]["a"].value;
+            var tp = document.forms["ipdata"]["tp"].value;
+            var agr = document.forms["ipdata"]["agr"].value;
+            document.getElementById('reset').click();
+
+            if (gender == 'Male')
+                gender = 0
+            else
+                gender = 1
+
+            var url = 'http://127.0.0.1:5000/predict?age=' + age + '&gender=' + gender + '&tb=' + tb + '&db=' + db + '&ap=' + ap + '&aa=' + aa + '&asa=' + asa + '&a=' + a + '&tp=' + tp + '&agr=' + agr
+            fetch(url)
+            .then( response => response.json() )
+            .then( data => {
+                console.log(data.result);
+                if(parseInt(data.result)>50)
+                {
+                    document.getElementById('neg_data').innerHTML = "Probability of Liver Failure is "+ data.result +"%<br/>\"There is a Possiblity that you are having Liver Disease.\"";
+                    document.getElementById('negative').hidden = false;
+                }
+                else
+                {
+                    document.getElementById('pos_data').innerHTML = "Probability of Liver Failure is "+ data.result +"%<br/>\"There is a Very Less Possiblity that you are have Liver Disease. Stay Healthy\"";
+                    document.getElementById('positive').hidden = false;
+                }
+                
+            })
+            .catch( error => console.log(error) )
+        }
+    </script>
+</head>
+<body>
+    <h2 id="h">Liver Disease Prediction</h2>
+    <div id="positive" hidden><h4 id="pos_data">Positive</h4></div>
+    <div id="negative" hidden><h4 id="neg_data">Negative</h4></div>
+    <table>
+        <form name="ipdata" onsubmit="event.preventDefault(); Predict();" on action="/" method="get">
+        <tr>
+            <td>Age</td>
+            <td><input name="age" type="number" min="0" step="1" placeholder="Eg: 30" required></td>
+        </tr>
+        <tr>
+            <td>Gender</td>
+            <td><input name="gender" type="radio" value="Male" required>&nbsp;Male&ensp;&ensp;<input id="gender" name="gender" type="radio" value="Female">&nbsp;Female</td>
+        </tr>
+        <tr>
+            <td>Total Bilirubin</td>
+            <td><input name="tb" type="number" min="0" step="0.01" placeholder="0.22 - 1.0 mg/dl" required></td>
+        </tr>
+        <tr>
+            <td>Direct Bilirubin</td>
+            <td><input name="db" type="number" min="0" step="0.01" placeholder="0.0 - 0.2 mg/dl" required></td>
+        </tr>
+        <tr>
+            <td>Alkaline Phosphotase</td>
+            <td><input name="ap" type="number" min="0" step="0.01" placeholder="110 - 310 U/L" required></td>
+        </tr>
+        <tr>
+            <td>Alamine Aminotransferase (SGPT)</td>
+            <td><input name="aa" type="number" min="0" step="0.01" placeholder="5 - 45 U/L" required></td>
+        </tr>
+        <tr>
+            <td>Aspartate Aminotransferase (SGOT)</td>
+            <td><input name="asa" type="number" min="0" step="0.01" placeholder="5 - 40 U/L" required></td>
+        </tr>
+        <tr>
+            <td>Albumin</td>
+            <td><input name="a" type="number" min="0" step="0.01" placeholder="3.5 - 5 gm/dl" required></td>
+        </tr>
+        <tr>
+            <td>Total Proteins</td>
+            <td><input name="tp" type="number" min="0" step="0.01" placeholder="7.2-8.0 gm/100ml" required></td>
+        </tr>
+        <tr>
+            <td>A/G Ratio</td>
+            <td><input name="agr" type="number" min="0" step="0.01" placeholder="1.7-2.2" required></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td id="btn"><div id="btndiv"><input id="submit" type="submit" value="Predict"></div>&emsp;<div id="btndiv"><input id="reset" type="reset" value="Clear"></div></td>
+        </tr>
+        
+        </form>
+    </table>
+</body>
+</html>
